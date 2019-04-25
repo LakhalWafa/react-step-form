@@ -3,6 +3,7 @@ import FormUserDetails from './FormUserDetails';
 import FormPersonalDetails from './FormPersonalDetails';
 import Confirm from './Confirm';
 import Success from './Success';
+import Validator from 'validator';
 
 class UserForm extends Component {
   state = {
@@ -12,7 +13,29 @@ class UserForm extends Component {
     email: '',
     occupation: '',
     city: '',
-    bio: ''
+    bio: '',
+    formErrors: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      occupation: '',
+      city: '',
+      bio: ''
+    },
+    show: false
+  };
+
+  showAlert = () => {
+    this.setState({ show: true });
+  };
+
+  closeAlert = e => {
+    e.preventDefault();
+    this.setState({ show: false });
+  };
+
+  closeAlertNext = () => {
+    this.setState({ show: false });
   };
 
   // Procced to next step
@@ -33,8 +56,48 @@ class UserForm extends Component {
 
   // Handle filds change
   handleChange = input => e => {
+    const { value } = e.target;
+    const formErrors = { ...this.state.formErrors };
+    switch (input) {
+      case 'firstName':
+        formErrors.firstName =
+          Validator.isEmpty(value) || !Validator.isAlpha(value)
+            ? 'Field required'
+            : '';
+        break;
+      case 'lastName':
+        formErrors.lastName =
+          Validator.isEmpty(value) || !Validator.isAlpha(value)
+            ? 'Field required'
+            : '';
+        break;
+      case 'email':
+        formErrors.email =
+          !Validator.isEmail(value) || Validator.isEmpty(value)
+            ? 'Invalid Email'
+            : '';
+        break;
+      case 'occupation':
+        formErrors.occupation =
+          Validator.isEmpty(value) || !Validator.isAlpha(value)
+            ? 'Field required'
+            : '';
+        break;
+      case 'bio':
+        formErrors.bio = Validator.isEmpty(value) ? 'Field required' : '';
+        break;
+      case 'city':
+        formErrors.city =
+          Validator.isEmpty(value) || !Validator.isAlpha(value)
+            ? 'Field required'
+            : '';
+        break;
+      default:
+        break;
+    }
     this.setState({
-      [input]: e.target.value
+      [input]: value,
+      formErrors
     });
   };
 
@@ -47,7 +110,8 @@ class UserForm extends Component {
       city,
       bio,
       email,
-      validation
+      formErrors,
+      show
     } = this.state;
     const values = {
       firstName,
@@ -56,7 +120,8 @@ class UserForm extends Component {
       city,
       bio,
       email,
-      validation
+      formErrors,
+      show
     };
     // eslint-disable-next-line
     switch (step) {
@@ -66,6 +131,9 @@ class UserForm extends Component {
             nextStep={this.nextStep}
             handleChange={this.handleChange}
             values={values}
+            showAlert={this.showAlert}
+            closeAlert={this.closeAlert}
+            closeAlertNext={this.closeAlertNext}
           />
         );
       case 2:
@@ -75,6 +143,9 @@ class UserForm extends Component {
             prevStep={this.prevStep}
             handleChange={this.handleChange}
             values={values}
+            showAlert={this.showAlert}
+            closeAlert={this.closeAlert}
+            closeAlertNext={this.closeAlertNext}
           />
         );
       case 3:
